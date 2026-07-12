@@ -22,10 +22,11 @@ def valid_price_csv(tmp_path):
 @pytest.fixture
 def valid_events_csv(tmp_path):
     path = tmp_path / "events.csv"
+    years = range(1990, 2002)  # 1990-2001, 12 rows, enough to pass the >=10 check
     rows = [
-        {"event_date": f"20{y:02d}-01-01", "event_name": f"Event {y}",
+        {"event_date": f"{year}-01-01", "event_name": f"Event {year}",
          "category": "OPEC Policy", "description": "desc"}
-        for y in range(90, 102)  # 12 rows, enough to pass the >=10 check
+        for year in years
     ]
     pd.DataFrame(rows).to_csv(path, index=False)
     return str(path)
