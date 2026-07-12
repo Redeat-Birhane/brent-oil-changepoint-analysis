@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+seaborn
+pymc
+arviz
+statsmodels
+scipy
+jupyter
+flask
+flask-cors
+pytest
