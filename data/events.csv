@@ -1,16 +1,16 @@
 event_date,event_name,category,description
-1990-08-02,Iraqi Invasion of Kuwait,Geopolitical Conflict,Iraq invades Kuwait, triggering the Gulf War and a sharp oil supply shock.
-1997-07-02,Asian Financial Crisis,Economic Shock,Currency and financial crisis across Asia sharply reduces regional oil demand.
-2001-09-11,September 11 Attacks,Geopolitical Shock,Terrorist attacks in the US create global economic uncertainty affecting energy markets.
-2003-03-20,US Invasion of Iraq,Geopolitical Conflict,US-led invasion of Iraq disrupts Middle East oil production and raises risk premiums.
-2008-07-11,Oil Price Peak (~$147/barrel),Market Extreme,Brent crude reaches an all-time high amid strong demand and speculative activity.
-2008-09-15,Global Financial Crisis (Lehman Collapse),Economic Shock,Collapse of Lehman Brothers triggers a global recession and demand collapse, crashing oil prices.
-2011-02-15,Arab Spring / Libyan Civil War,Geopolitical Conflict,Unrest across the Middle East and Libyan civil war disrupt oil supply from North Africa.
-2014-06-01,OPEC Maintains Production Amid Oversupply,OPEC Policy,OPEC declines to cut output despite a growing supply glut, contributing to a price collapse.
-2014-11-27,OPEC Decision Not to Cut Production,OPEC Policy,OPEC formally maintains production quotas, accelerating the 2014-2016 price crash.
-2016-11-30,OPEC Production Cut Agreement,OPEC Policy,OPEC agrees to its first production cut in 8 years to stabilize falling prices.
-2018-05-08,US Withdraws from Iran Nuclear Deal,Sanctions,US reinstates sanctions on Iran, reducing Iranian oil exports and tightening supply.
-2019-09-14,Saudi Aramco Drone Attack (Abqaiq-Khurais),Geopolitical Conflict,Attacks temporarily knock out roughly half of Saudi oil production capacity.
-2020-03-08,Saudi-Russia Oil Price War,OPEC Policy,Failed OPEC+ talks lead Saudi Arabia to slash prices and raise output, crashing prices.
-2020-04-20,COVID-19 Demand Collapse (Negative WTI),Economic Shock,Pandemic lockdowns collapse oil demand; US WTI briefly trades negative.
-2022-02-24,Russian Invasion of Ukraine,Geopolitical Conflict,Russia's invasion triggers sanctions and supply fears, sending Brent prices sharply higher.
+1990-08-02,Iraqi Invasion of Kuwait,Geopolitical Conflict,"Iraq invades Kuwait, triggering the Gulf War and a sharp oil supply shock."
+1997-07-02,Asian Financial Crisis,Economic Shock,"Currency and financial crisis across Asia sharply reduces regional oil demand."
+2001-09-11,September 11 Attacks,Geopolitical Shock,"Terrorist attacks in the US create global economic uncertainty affecting energy markets."
+2003-03-20,US Invasion of Iraq,Geopolitical Conflict,"US-led invasion of Iraq disrupts Middle East oil production and raises risk premiums."
+2008-07-11,Oil Price Peak (~$147/barrel),Market Extreme,"Brent crude reaches an all-time high amid strong demand and speculative activity."
+2008-09-15,Global Financial Crisis (Lehman Collapse),Economic Shock,"Collapse of Lehman Brothers triggers a global recession and demand collapse, crashing oil prices."
+2011-02-15,Arab Spring / Libyan Civil War,Geopolitical Conflict,"Unrest across the Middle East and Libyan civil war disrupt oil supply from North Africa."
+2014-06-01,OPEC Maintains Production Amid Oversupply,OPEC Policy,"OPEC declines to cut output despite a growing supply glut, contributing to a price collapse."
+2014-11-27,OPEC Decision Not to Cut Production,OPEC Policy,"OPEC formally maintains production quotas, accelerating the 2014-2016 price crash."
+2016-11-30,OPEC Production Cut Agreement,OPEC Policy,"OPEC agrees to its first production cut in 8 years to stabilize falling prices."
+2018-05-08,US Withdraws from Iran Nuclear Deal,Sanctions,"US reinstates sanctions on Iran, reducing Iranian oil exports and tightening supply."
+2019-09-14,Saudi Aramco Drone Attack (Abqaiq-Khurais),Geopolitical Conflict,"Attacks temporarily knock out roughly half of Saudi oil production capacity."
+2020-03-08,Saudi-Russia Oil Price War,OPEC Policy,"Failed OPEC+ talks lead Saudi Arabia to slash prices and raise output, crashing prices."
+2020-04-20,COVID-19 Demand Collapse (Negative WTI),Economic Shock,"Pandemic lockdowns collapse oil demand; US WTI briefly trades negative."
+2022-02-24,Russian Invasion of Ukraine,Geopolitical Conflict,"Russia's invasion triggers sanctions and supply fears, sending Brent prices sharply higher."
