@@ -60,8 +60,8 @@ def build_mean_shift_model(series: pd.Series) -> pm.Model:
 
 
 def sample_model(model: pm.Model, draws: int = 2000, tune: int = 1000,
-                  chains: int = 4, target_accept: float = 0.9,
-                  random_seed: int = 42) -> az.InferenceData:
+                  chains: int = 4, cores: int = 1, target_accept: float = 0.9,
+                  random_seed: int = 42, nuts_sampler: str = "nutpie") -> az.InferenceData:
     """
     Run MCMC sampling on a PyMC model.
 
@@ -69,10 +69,12 @@ def sample_model(model: pm.Model, draws: int = 2000, tune: int = 1000,
         ModelError: if sampling fails outright (e.g. bad model spec).
     """
     try:
-        with model:
+        # quick smoke-test run first
+         with model:
             trace = pm.sample(
-                draws=draws, tune=tune, chains=chains,
+                draws=draws, tune=tune, chains=chains, cores=cores,
                 target_accept=target_accept, random_seed=random_seed,
+                nuts_sampler=nuts_sampler,
                 return_inferencedata=True, progressbar=True,
             )
     except Exception as e:

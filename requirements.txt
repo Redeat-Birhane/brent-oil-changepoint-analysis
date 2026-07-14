@@ -3,10 +3,11 @@ numpy
 matplotlib
 seaborn
 pymc
-arviz
+arviz==0.22.0
 statsmodels
 scipy
 jupyter
 flask
 flask-cors
 pytest
+nutpie
