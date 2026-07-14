@@ -94,9 +94,15 @@ def check_convergence(trace: az.InferenceData, r_hat_threshold: float = 1.05) ->
     except Exception as e:
         raise ModelError(f"Failed to compute convergence summary: {e}")
 
-    r_hats = summary["r_hat"].to_dict()
-    failed = {k: v for k, v in r_hats.items() if v > r_hat_threshold}
+    r_hat_numeric = pd.to_numeric(summary["r_hat"], errors="coerce")
+    r_hats = r_hat_numeric.to_dict()
 
+    n_missing = r_hat_numeric.isna().sum()
+    if n_missing > 0:
+        print(f"NOTE: r_hat could not be computed for {n_missing} parameter(s) "
+              f"(shown as NaN) — likely a single-chain or degenerate parameter.")
+
+    failed = {k: v for k, v in r_hats.items() if pd.notna(v) and v > r_hat_threshold}
     if failed:
         print(f"WARNING: {len(failed)} parameter(s) exceed r_hat threshold "
               f"of {r_hat_threshold}: {failed}")
