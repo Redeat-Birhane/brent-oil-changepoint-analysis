@@ -5,7 +5,7 @@ import pytest
 from src.change_point_model import (
     build_mean_shift_model, ModelError, get_change_point_date, summarize_impact
 )
-
+from src.change_point_model import build_volatility_shift_model
 
 def make_synthetic_series(n=200, switch_at=100, mu1=0.0, mu2=2.0, sigma=0.5, seed=42):
     """Series with a known, deliberate mean shift at `switch_at`."""
@@ -53,3 +53,29 @@ def test_get_change_point_date_missing_tau():
     s = make_synthetic_series()
     with pytest.raises(ModelError, match="does not contain"):
         get_change_point_date(FakeTrace(), s)
+
+def test_build_volatility_model_empty_series():
+    with pytest.raises(ModelError, match="empty"):
+        build_volatility_shift_model(pd.Series([], dtype=float))
+
+
+def test_build_volatility_model_with_nans():
+    s = pd.Series([1.0, 2.0, np.nan, 3.0] * 10)
+    with pytest.raises(ModelError, match="NaN"):
+        build_volatility_shift_model(s)
+
+
+def test_build_volatility_model_too_short():
+    s = pd.Series(np.random.randn(10))
+    with pytest.raises(ModelError, match="only 10"):
+        build_volatility_shift_model(s)
+
+
+def test_build_volatility_model_success():
+    s = make_synthetic_series()
+    model = build_volatility_shift_model(s)
+    var_names = [v.name for v in model.free_RVs]
+    assert "tau" in var_names
+    assert "mu" in var_names
+    assert "sigma_1" in var_names
+    assert "sigma_2" in var_names
