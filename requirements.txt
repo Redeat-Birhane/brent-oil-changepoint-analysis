@@ -1,13 +1,13 @@
 pandas
-numpy
-matplotlib
+numpy<2.0
+matplotlib==3.8.4
 seaborn
-pymc
-arviz==0.22.0
 statsmodels
 scipy
 jupyter
 flask
 flask-cors
 pytest
+pymc==5.16.2
+arviz==0.18.0
 nutpie

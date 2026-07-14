@@ -1,8 +1,8 @@
 """
 Bayesian change point model for Brent oil log returns.
 
-Keeps model definition, sampling, and result-summarization logic out of the
-notebook so it can be tested and reused (e.g. by the dashboard backend).
+Uses the `nutpie` NUTS sampler by default, which ships precompiled binaries
+and does not require a C++ compiler (a common blocker on Windows).
 """
 import numpy as np
 import pandas as pd
@@ -59,23 +59,23 @@ def build_mean_shift_model(series: pd.Series) -> pm.Model:
     return model
 
 
-def sample_model(model: pm.Model, draws: int = 2000, tune: int = 1000,
-                  chains: int = 4, cores: int = 1, target_accept: float = 0.9,
-                  random_seed: int = 42, nuts_sampler: str = "nutpie") -> az.InferenceData:
+def sample_model(model: pm.Model, draws: int = 1000, tune: int = 1000,
+                  chains: int = 4, random_seed: int = 42,
+                  nuts_sampler: str = "nutpie") -> az.InferenceData:
     """
-    Run MCMC sampling on a PyMC model.
+    Run MCMC sampling on a PyMC model using the nutpie backend by default
+    (no C++ compiler required).
 
     Raises:
-        ModelError: if sampling fails outright (e.g. bad model spec).
+        ModelError: if sampling fails outright.
     """
     try:
-        # quick smoke-test run first
-         with model:
+        with model:
             trace = pm.sample(
-                draws=draws, tune=tune, chains=chains, cores=cores,
-                target_accept=target_accept, random_seed=random_seed,
+                draws=draws, tune=tune, chains=chains,
+                random_seed=random_seed,
                 nuts_sampler=nuts_sampler,
-                return_inferencedata=True, progressbar=True,
+                progressbar=True,
             )
     except Exception as e:
         raise ModelError(f"MCMC sampling failed: {e}")
@@ -87,9 +87,6 @@ def check_convergence(trace: az.InferenceData, r_hat_threshold: float = 1.05) ->
     """
     Check r_hat for all parameters. Returns a dict of {param: r_hat} and
     flags any parameter exceeding the threshold.
-
-    Raises:
-        ModelError: if r_hat cannot be computed (e.g. single chain).
     """
     try:
         summary = az.summary(trace)
@@ -101,10 +98,10 @@ def check_convergence(trace: az.InferenceData, r_hat_threshold: float = 1.05) ->
 
     n_missing = r_hat_numeric.isna().sum()
     if n_missing > 0:
-        print(f"NOTE: r_hat could not be computed for {n_missing} parameter(s) "
-              f"(shown as NaN) — likely a single-chain or degenerate parameter.")
+        print(f"NOTE: r_hat could not be computed for {n_missing} parameter(s).")
 
     failed = {k: v for k, v in r_hats.items() if pd.notna(v) and v > r_hat_threshold}
+
     if failed:
         print(f"WARNING: {len(failed)} parameter(s) exceed r_hat threshold "
               f"of {r_hat_threshold}: {failed}")
@@ -115,13 +112,7 @@ def check_convergence(trace: az.InferenceData, r_hat_threshold: float = 1.05) ->
 
 
 def get_change_point_date(trace: az.InferenceData, series: pd.Series) -> pd.Timestamp:
-    """
-    Map the posterior mode of tau (an integer index) back to an actual date
-    using the series' index.
-
-    Raises:
-        ModelError: if tau is not in the trace or maps out of range.
-    """
+    """Map the posterior mode of tau back to an actual date."""
     if "tau" not in trace.posterior:
         raise ModelError("Trace does not contain a 'tau' variable.")
 
@@ -129,16 +120,13 @@ def get_change_point_date(trace: az.InferenceData, series: pd.Series) -> pd.Time
     tau_mode = int(pd.Series(tau_samples).mode().iloc[0])
 
     if tau_mode < 0 or tau_mode >= len(series):
-        raise ModelError(f"Posterior tau index {tau_mode} is out of range for series of length {len(series)}.")
+        raise ModelError(f"Posterior tau index {tau_mode} is out of range.")
 
     return series.index[tau_mode]
 
 
 def summarize_impact(trace: az.InferenceData) -> dict:
-    """
-    Return posterior means and 95% credible intervals for mu_1, mu_2, and
-    the implied percent change, for reporting.
-    """
+    """Posterior means and 95% credible intervals for mu_1, mu_2, and % change."""
     summary = az.summary(trace, var_names=["mu_1", "mu_2"], hdi_prob=0.95)
 
     mu_1_mean = summary.loc["mu_1", "mean"]
