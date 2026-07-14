@@ -58,23 +58,17 @@ def build_mean_shift_model(series: pd.Series) -> pm.Model:
 
     return model
 
-
 def sample_model(model: pm.Model, draws: int = 1000, tune: int = 1000,
-                  chains: int = 4, random_seed: int = 42,
-                  nuts_sampler: str = "nutpie") -> az.InferenceData:
+                  chains: int = 4, random_seed: int = 42) -> az.InferenceData:
     """
-    Run MCMC sampling on a PyMC model using the nutpie backend by default
-    (no C++ compiler required).
-
-    Raises:
-        ModelError: if sampling fails outright.
+    Run MCMC sampling on a PyMC model. PyMC auto-assigns a compound step
+    (NUTS for continuous parameters, Metropolis for the discrete tau).
     """
     try:
         with model:
             trace = pm.sample(
                 draws=draws, tune=tune, chains=chains,
                 random_seed=random_seed,
-                nuts_sampler=nuts_sampler,
                 progressbar=True,
             )
     except Exception as e:
@@ -141,5 +135,74 @@ def summarize_impact(trace: az.InferenceData) -> dict:
         "mu_1_hdi": (summary.loc["mu_1", "hdi_2.5%"], summary.loc["mu_1", "hdi_97.5%"]),
         "mu_2_mean": mu_2_mean,
         "mu_2_hdi": (summary.loc["mu_2", "hdi_2.5%"], summary.loc["mu_2", "hdi_97.5%"]),
+        "pct_change": pct_change,
+    }
+
+def build_volatility_shift_model(series: pd.Series) -> pm.Model:
+    """
+    Build a single change point model where VOLATILITY (sigma) shifts at
+    tau, rather than the mean. Motivated by Task 1 EDA: Brent log returns
+    hover near a constant mean across the full history, but volatility
+    clusters into distinct regimes (calm vs. turbulent periods).
+
+    Prior: tau ~ DiscreteUniform over all time indices.
+    Likelihood: Normal with a single shared mean (mu), but sigma switches
+    from sigma_1 to sigma_2 at tau.
+
+    Raises:
+        ModelError: if the series is empty, has NaNs, or is too short.
+    """
+    if series is None or len(series) == 0:
+        raise ModelError("Input series is empty.")
+
+    if series.isna().any():
+        raise ModelError(
+            f"Input series contains {series.isna().sum()} NaN value(s); "
+            "drop or fill them before modeling."
+        )
+
+    if len(series) < 30:
+        raise ModelError(
+            f"Input series has only {len(series)} observations; "
+            "need a reasonably long series for a meaningful change point."
+        )
+
+    y = series.values
+    n = len(y)
+    idx = np.arange(n)
+
+    with pm.Model() as model:
+        tau = pm.DiscreteUniform("tau", lower=0, upper=n - 1)
+
+        mu = pm.Normal("mu", mu=y.mean(), sigma=y.std() * 2)
+        sigma_1 = pm.HalfNormal("sigma_1", sigma=y.std() * 2)
+        sigma_2 = pm.HalfNormal("sigma_2", sigma=y.std() * 2)
+
+        sigma = pm.math.switch(tau >= idx, sigma_1, sigma_2)
+
+        pm.Normal("obs", mu=mu, sigma=sigma, observed=y)
+
+    return model
+
+
+def summarize_volatility_impact(trace: az.InferenceData) -> dict:
+    """
+    Posterior means and 95% credible intervals for sigma_1, sigma_2, and
+    the implied percent change in volatility.
+    """
+    summary = az.summary(trace, var_names=["sigma_1", "sigma_2"], hdi_prob=0.95)
+
+    sigma_1_mean = summary.loc["sigma_1", "mean"]
+    sigma_2_mean = summary.loc["sigma_2", "mean"]
+
+    pct_change = None
+    if sigma_1_mean != 0:
+        pct_change = (sigma_2_mean - sigma_1_mean) / sigma_1_mean * 100
+
+    return {
+        "sigma_1_mean": sigma_1_mean,
+        "sigma_1_hdi": (summary.loc["sigma_1", "hdi_2.5%"], summary.loc["sigma_1", "hdi_97.5%"]),
+        "sigma_2_mean": sigma_2_mean,
+        "sigma_2_hdi": (summary.loc["sigma_2", "hdi_2.5%"], summary.loc["sigma_2", "hdi_97.5%"]),
         "pct_change": pct_change,
     }
